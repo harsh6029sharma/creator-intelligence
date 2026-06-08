@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +5,69 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  profileImage String?
+  refreshToken String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  channels Channel[]
+}
+
+model Channel {
+  id               String    @id @default(uuid())
+  userId           String
+  youtubeChannelId String    @unique
+  name             String
+  lastFetchedAt    DateTime?
+  createdAt        DateTime  @default(now())
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments           Comment[]
+  sentimentSnapshots SentimentSnapshot[]
+}
+
+model Comment {
+  id        String @id @default(uuid())
+  channelId String
+
+  videoId          String
+  youtubeCommentId String   @unique
+  text             String
+  label            String?
+  confidence       Float?
+  moderationStatus String   @default("pending")
+  hiddenAt         DateTime?
+  fetchedAt        DateTime
+  createdAt        DateTime @default(now())
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([channelId])
+  @@index([videoId])
+  @@index([label])
+  @@index([moderationStatus])
+}
+
+
+model SentimentSnapshot {
+  id String @id @default(uuid())
+  channelId String
+  date DateTime @db.Date
+  toxicCount Int @default(0)
+  safeCount Int @default(0)
+  spamCount Int  @default(0)
+
+  avgConfidence Float @default(0)
+  createdAt DateTime @default(now())
+  
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, date])
+  @@index([channelId])
 }

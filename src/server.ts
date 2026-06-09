@@ -3,6 +3,8 @@ import type { Request, Response, NextFunction } from 'express'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth.route'
+import channelRoutes from './routes/channel.route'
+import { startFetchJob } from './jobs/fetch.job'
 
 dotenv.config()
 
@@ -17,6 +19,7 @@ app.use(cookieParser())
 
 // Routes
 app.use("/auth", authRoutes)
+app.use("/channel", channelRoutes)
 
 
 // Health check
@@ -35,4 +38,5 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 app.listen(PORT, () => {
     console.log(`server is listening on port: ${PORT}`);
+    startFetchJob()
 })

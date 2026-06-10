@@ -181,7 +181,6 @@ Groq Classification
 | Model          | llama-3.3-70b-versatile |
 | Authentication | Google OAuth 2.0 + JWT  |
 | External APIs  | YouTube Data API v3     |
-| Deployment     | Railway                 |
 
 ---
 

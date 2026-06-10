@@ -104,64 +104,86 @@ This ensures:
 
 ---
 
-# System Architecture
+## System Architecture
 
 ```text
-Creator Login
+                    Docker Compose
+                           │
+      ┌────────────────────┼────────────────────┐
+      │                    │                    │
+      ▼                    ▼                    ▼
+   Express API        PostgreSQL            Redis
+      │                                      │
+      │                                      │
+      │                                BullMQ Queue
+      │                                      │
+      │                                      ▼
+      │                                 Worker
+      │                                      │
+      ▼                                      ▼
+ Google OAuth                         Groq AI
+      │                                      │
+      ▼                                      │
+ JWT Authentication                          │
+      │                                      │
+      ▼                                      │
+ Connect YouTube Channel                     │
+      │                                      │
+      ▼                                      │
+ YouTube Data API                            │
+      │                                      │
+      ▼                                      │
+ Fetch Comments ─────────────────────────────┘
       │
       ▼
-Google OAuth
-      │
-      ▼
-JWT Authentication
-      │
-      ▼
-YouTube Channel Connected
-      │
-      ▼
-Hourly Cron Job
-      │
-      ▼
-Fetch Latest Comments
-      │
-      ▼
-PostgreSQL Storage
-      │
-      ▼
-BullMQ Queue
-      │
-      ▼
-Worker Processes Jobs
-      │
-      ▼
-Groq Classification
-      │
-      ▼
- ┌───────────────────────────────┐
- │ toxic + confidence ≥ 0.90     │
- └───────────────┬───────────────┘
-                 ▼
-      Auto Hide via YouTube API
+ Store Comments
 
- ┌───────────────────────────────┐
- │ toxic + confidence 0.70-0.90  │
- └───────────────┬───────────────┘
-                 ▼
-          Manual Review
+      ┌───────────────────────────────┐
+      │ toxic + confidence >= 0.90    │
+      └───────────────┬───────────────┘
+                      ▼
+           Hide via YouTube API
 
- ┌───────────────────────────────┐
- │ spam / safe / low confidence  │
- └───────────────┬───────────────┘
-                 ▼
-             Approved
+      ┌───────────────────────────────┐
+      │ toxic + confidence 0.70-0.90  │
+      └───────────────┬───────────────┘
+                      ▼
+                Manual Review
 
-      Daily Snapshot Cron
-                 │
-                 ▼
-       Sentiment Aggregation
-                 │
-                 ▼
-          Cached Analytics
+      ┌───────────────────────────────┐
+      │ spam / safe comments          │
+      └───────────────┬───────────────┘
+                      ▼
+                   Approved
+
+
+Daily Snapshot Cron
+        │
+        ▼
+SentimentSnapshot Table
+        │
+        ▼
+Analytics Service
+        │
+        ▼
+Redis Cache
+        │
+        ▼
+Dashboard
+
+
+
+Flow Summary:
+
+1. Creator connects their YouTube account using Google OAuth.
+2. A scheduled job fetches the latest comments from YouTube.
+3. Comments are stored in PostgreSQL.
+4. Each comment is pushed to a BullMQ queue.
+5. A worker sends comments to Groq for classification.
+6. Toxic comments with high confidence are automatically hidden.
+7. Borderline cases are sent for manual review.
+8. Daily sentiment snapshots are generated for analytics.
+9. Analytics responses are cached in Redis.
 ```
 
 ---
@@ -276,6 +298,21 @@ Benefits:
 * Faster API response times
 * Reduced risk of timeout failures
 
+### Containerized Development Environment
+
+The project is fully Dockerized to eliminate "works on my machine" issues.
+
+All application dependencies, PostgreSQL, and Redis services run inside dedicated containers managed through Docker Compose.
+
+This approach provides:
+
+- Consistent environments across development and production
+- Easier deployment workflows
+- Faster contributor onboarding
+- Simplified infrastructure management
+
+By containerizing the entire stack, developers can run the project without installing PostgreSQL or Redis locally.
+
 ---
 
 # API Reference
@@ -333,6 +370,75 @@ Indexes:
 ```
 
 ---
+
+# Running with Docker
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+
+### Build Containers
+
+```bash
+docker compose build
+```
+
+### Start All Services
+
+```bash
+docker compose up
+```
+
+### Start in Detached Mode
+
+```bash
+docker compose up -d
+```
+
+### Stop All Services
+
+```bash
+docker compose down
+```
+
+### View Logs
+
+```bash
+docker compose logs -f
+```
+
+### Run Database Migrations
+
+```bash
+docker compose exec app npx prisma migrate deploy
+```
+
+### Generate Prisma Client
+
+```bash
+docker compose exec app npx prisma generate
+```
+
+### Access Running Containers
+
+Application:
+
+```bash
+docker compose exec app sh
+```
+
+PostgreSQL:
+
+```bash
+docker compose exec db psql -U postgres
+```
+
+Redis:
+
+```bash
+docker compose exec redis redis-cli
+```
 
 # Local Development
 

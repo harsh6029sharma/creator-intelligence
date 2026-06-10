@@ -181,8 +181,37 @@ Groq Classification
 | Model          | llama-3.3-70b-versatile |
 | Authentication | Google OAuth 2.0 + JWT  |
 | External APIs  | YouTube Data API v3     |
-
+| Containerization | Docker + Docker Compose |
 ---
+
+# Infrastructure
+
+The application is fully containerized using Docker and Docker Compose.
+
+Instead of requiring developers to install PostgreSQL and Redis manually, all core services run inside isolated containers.
+
+### Services
+
+| Service | Purpose |
+|----------|----------|
+| app | Express.js API Server |
+| db | PostgreSQL Database |
+| redis | Redis Cache & BullMQ Backend |
+
+### Benefits
+
+- Consistent development environment
+- Simplified onboarding
+- Faster setup process
+- Reduced dependency conflicts
+- Production-like local environment
+- Reproducible builds across machines
+
+The entire system can be started using a single command:
+
+```bash
+docker compose up --build
+```
 
 # Key Engineering Decisions
 

@@ -5,7 +5,7 @@ import { commentQueue } from '../queues/comment.queue'
 
 export const startFetchJob = () => {
 //   fetching the comments for every hours
-  cron.schedule('* * * * *', async () => {
+  cron.schedule('0 * * * *', async () => {
     console.log('Fetching comments...')
 
     try {

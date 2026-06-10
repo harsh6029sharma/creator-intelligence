@@ -18,7 +18,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/youtube.force-ssl',
 ]
 
-// Step 1 — Generate Google login URL
+// Generate Google login URL
 export const googleLogin = (req: Request, res: Response) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',

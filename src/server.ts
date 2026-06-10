@@ -4,7 +4,9 @@ import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth.route'
 import channelRoutes from './routes/channel.route'
+import analyticsRoutes from './routes/analytics.route'
 import { startFetchJob } from './jobs/fetch.job'
+import { startSnapshotJob } from './jobs/snapshot.job'
 
 dotenv.config()
 
@@ -20,6 +22,7 @@ app.use(cookieParser())
 // Routes
 app.use("/auth", authRoutes)
 app.use("/channel", channelRoutes)
+app.use("/analytics", analyticsRoutes)
 
 
 // Health check
@@ -39,4 +42,5 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 app.listen(PORT, () => {
     console.log(`server is listening on port: ${PORT}`);
     startFetchJob()
+    startSnapshotJob()
 })

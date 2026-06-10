@@ -2,7 +2,6 @@ import { google } from 'googleapis'
 import { prisma } from '../lib/prisma'
 
 export const fetchComments = async (channelId: string) => {
-  // Channel and user refreshToken
   const channel = await prisma.channel.findUnique({
     where: { id: channelId },
     include: { user: true }
@@ -12,7 +11,6 @@ export const fetchComments = async (channelId: string) => {
     throw new Error('No refresh token found')
   }
 
-  // YouTube client banao
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -23,31 +21,27 @@ export const fetchComments = async (channelId: string) => {
 
   const youtube = google.youtube({ version: 'v3', auth: oauth2Client })
 
-  // Videos of channel
-  const { data: videoData } = await youtube.commentThreads.list({
-    // part: ['snippet'],
-    // channelId: channel.youtubeChannelId,
-    // type: ['video'],
-    // maxResults: 10,
-    // order: 'date'
+  // Fetch latest videos from channel
+  const { data: videoData } = await youtube.search.list({
     part: ['snippet'],
-    videoId: '', //popular video ID
-    maxResults: 20,
+    channelId: channel.youtubeChannelId,
+    type: ['video'],
+    maxResults: 5,
+    order: 'date'
   })
 
   const videos = videoData.items ?? []
-
   let totalSaved = 0
 
   for (const video of videos) {
-    const videoId = video.snippet?.videoId
+    const videoId = video.id?.videoId
     if (!videoId) continue
 
-    // top-level Comments
+    // Fetch top-level comments for each video
     const { data: commentData } = await youtube.commentThreads.list({
       part: ['snippet'],
       videoId,
-      maxResults: 100,
+      maxResults: 20,
       ...(channel.lastFetchedAt && {
         publishedAfter: channel.lastFetchedAt.toISOString()
       })
@@ -76,7 +70,7 @@ export const fetchComments = async (channelId: string) => {
     }
   }
 
-  // lastFetchedAt updating
+  // Update lastFetchedAt
   await prisma.channel.update({
     where: { id: channelId },
     data: { lastFetchedAt: new Date() }

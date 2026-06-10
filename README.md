@@ -424,7 +424,8 @@ everything else
 
 **Harsh Sharma**
 
-Final Year B.Tech (Information Technology)
+B.Tech Graduate (Information Technology)
+Information Technology Graduate with a strong interest in backend engineering, distributed systems, and AI-powered applications.
 
 Backend-focused developer interested in distributed systems, AI-powered products, and scalable backend architecture.
 

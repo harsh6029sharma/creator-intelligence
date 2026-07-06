@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
+    "seed": "tsx prisma/seed.ts",
     "start": "node dist/server.js",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:studio": "npx prisma studio"
@@ -23,8 +24,10 @@
   },
   "homepage": "https://github.com/harsh6029sharma/creator-intelligence#readme",
   "devDependencies": {
+    "@faker-js/faker": "^10.5.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
@@ -41,6 +44,7 @@
     "bcrypt": "^6.0.0",
     "bullmq": "^5.78.0",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "googleapis": "^173.0.0",

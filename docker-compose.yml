@@ -1,3 +1,44 @@
+# services:
+#   app:
+#     build: .
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       - NODE_ENV=production
+#       - DATABASE_URL=postgresql://postgres:password@db:5432/creator_intelligence
+#       - REDIS_HOST=redis
+#       - REDIS_PORT=6379
+#       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+#       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+#       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+#       - GROQ_API_KEY=${GROQ_API_KEY}
+#       - JWT_SECRET=${JWT_SECRET}
+#     depends_on:
+#       - db
+#       - redis
+
+#   db:
+#     image: postgres:16
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: creator_intelligence
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     ports:
+#       - "5433:5432"
+
+#   redis:
+#     image: redis:7-alpine
+#     ports:
+#       - "6380:6379"
+#     volumes:
+#       - redis_data:/data
+
+# volumes:
+#   postgres_data:
+#   redis_data:
+
 services:
   app:
     build: .
@@ -14,8 +55,10 @@ services:
       - GROQ_API_KEY=${GROQ_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   db:
     image: postgres:16
@@ -27,6 +70,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -34,6 +82,11 @@ services:
       - "6380:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

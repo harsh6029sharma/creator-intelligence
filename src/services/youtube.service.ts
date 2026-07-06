@@ -40,7 +40,7 @@ export const fetchComments = async (channelId: string) => {
     // Fetch top-level comments for each video
     const { data: commentData } = await youtube.commentThreads.list({
       part: ['snippet'],
-      videoId,
+      videoId:'je-fc5CIG60',
       maxResults: 20,
       ...(channel.lastFetchedAt && {
         publishedAfter: channel.lastFetchedAt.toISOString()

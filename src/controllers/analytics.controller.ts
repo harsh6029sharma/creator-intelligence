@@ -80,7 +80,7 @@ export const getVideoStats = asyncHandler(async (req: AuthRequest, res: Response
   })
 
   const result = await Promise.all(
-    videoStats.map(async (v) => {
+    videoStats.map(async (v: { videoId: string; _count: { id: number } }) => {
       const toxic = await prisma.comment.count({
         where: { channelId, videoId: v.videoId, label: 'toxic' }
       })
